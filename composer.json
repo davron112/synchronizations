@@ -1,0 +1,40 @@
+{
+    "name": "davron112/synchronizations",
+    "type": "library",
+    "description": "Synchronizations package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Davron112 Software"
+        }
+    ],
+    "require": {
+        "php": "~7.1",
+        "illuminate/database": "^5.4",
+        "illuminate/support": "^5.4"
+    },
+    "require-dev": {
+        "Davron112/backbone": "^2.0",
+        "scrutinizer/ocular": "~1.1",
+        "squizlabs/php_codesniffer": "~2.3",
+        "sebastian/phpcpd": "*",
+        "phpmd/phpmd" : "@stable"
+    },
+    "autoload": {
+        "psr-4": {
+            "Davron112\\Synchronizations\\": "src/app/"
+        }
+    },
+    "scripts": {
+        "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+        "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
