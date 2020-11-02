@@ -105,12 +105,7 @@ class ProductSynchronization extends BaseSynchronization implements ProductSynch
         $rowsAffected = 0;
         if (!empty($items)) {
             $rowsAffected = $db::transaction(function () use ($items, $model, $dataKey, $dbKey, $rowsAffected) {
-                $i = 0;
                 foreach ($items as $item) {
-                    $i++;
-                    if ($i > 10) {
-                        break;
-                    }
                     if ($result = $this->checkIfExists($model, $item[$dataKey], $dbKey)) {
                         $item = $this->mapper->map($item);
                         $this->updateRow($result, $item);
