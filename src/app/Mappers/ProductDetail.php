@@ -32,20 +32,18 @@ class ProductDetail extends BaseMapper
             if ($item['key'] == 'Brand') {
                 $brand = $item['value'];
             }
-            if ($item['key'] == 'Model') {
-                $model = $item['value'];
-            }
-            if ($item['key'] == 'Срок гарантии') {
-                $model = $item['value'];
-            }
         }
 
-        $manufacturer = Manufacturer::where('name_ru', 'LIKE', "%$brand%")->first();
-        $category = Category::where('ext_id', $categoryUuid)->first();
+        $categories = config('ext_ids', []);
         $categoryId = null;
-        if ($category) {
-            $categoryId = $category->id;
+        foreach ($categories as $category) {
+            if ($category['uuid'] == $categoryUuid) {
+                $categoryId = $category['id'];
+                break;
+            }
         }
+        $manufacturer = Manufacturer::where('name_ru', 'LIKE', "%$brand%")->first();
+
         $manufacturer_id = null;
         if ($manufacturer) {
             $manufacturer_id = $manufacturer->id;
