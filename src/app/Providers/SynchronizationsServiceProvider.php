@@ -2,9 +2,11 @@
 
 namespace Davron112\Synchronizations\Providers;
 
+use Davron112\Synchronizations\Jobs\Contracts\ProductDetailSynchronization;
+use Davron112\Synchronizations\Jobs\ProductSynchronization;
 use Illuminate\Support\ServiceProvider;
 use Davron112\Synchronizations\Jobs\Contracts\ProductSynchronization as ProductSynchronizationInterface;
-use Davron112\Synchronizations\Jobs\ProductSynchronization;
+use Davron112\Synchronizations\Jobs\Contracts\ProductDetailSynchronization as ProductDetailSynchronizationInterface;
 
 /**
  * Class SynchronizationsServiceProvider
@@ -33,5 +35,6 @@ class SynchronizationsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(ProductSynchronizationInterface::class, ProductSynchronization::class);
+        $this->app->bind(ProductDetailSynchronizationInterface::class, ProductDetailSynchronization::class);
     }
 }

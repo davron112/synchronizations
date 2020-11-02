@@ -17,7 +17,7 @@ class CreateSynchronizationsTable extends Migration
             $table->string('type')->index();
             $table->string('status')->index();
             $table->text('report')->nullable();
-            $table->integer('rows_affected')->after('status_id')->default(0);
+            $table->integer('rows_affected')->default(0);
             $table->bigInteger('key')->unsigned()->nullable();
             $table->timestamps();
         });

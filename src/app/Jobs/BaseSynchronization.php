@@ -3,7 +3,8 @@
 namespace Davron112\Synchronizations\Jobs;
 
 use Davron112\Synchronizations\Models\Synchronization;
-use DB;
+use Illuminate\Support\Arr;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -13,6 +14,16 @@ use Illuminate\Database\Eloquent\Model;
 abstract class BaseSynchronization extends Job
 {
     /**
+     * @var
+     */
+    protected $service;
+
+    /**
+     * @var
+     */
+    protected $updateColumns = [];
+
+    /**
      * Create new synchronization.
      *
      * @param int $synchronizationType synchronization type
@@ -21,9 +32,7 @@ abstract class BaseSynchronization extends Job
      */
     protected function createNewSynchronization($synchronizationType)
     {
-        $synchronizationModel       = $this->synchronizationModel;
-
-        $this->synchronization = $synchronizationModel::create([
+        $this->synchronization = Synchronization::create([
             'status' => Synchronization::ID_IN_PROGRESS,
             'type'   => $synchronizationType
         ]);
@@ -38,66 +47,11 @@ abstract class BaseSynchronization extends Job
      */
     protected function updateSynchronization($synchronizationStatus, $rowsAffected = 0, $key = null)
     {
-        $synchronization                = $this->synchronization;
-        $synchronization->status_id     = $synchronizationStatus;
+        $synchronization                = new Synchronization();
+        $synchronization->status        = $synchronizationStatus;
         $synchronization->rows_affected = $rowsAffected;
         $synchronization->key           = $key;
         $synchronization->save();
-    }
-
-    /**
-     * After creation
-     *
-     * @param int $id item ID
-     * @param array $data
-     */
-    abstract public function afterCreation(int $id, array $data);
-
-    /**
-     * After update
-     *
-     * @param int $id item ID
-     * @param array $data
-     */
-    abstract public function afterUpdate(int $id, array $data);
-
-    /**
-     * Process data
-     *
-     * @param \DB $db
-     * @param mixed $items
-     * @param \App\Models\Model $model
-     * @param string $dataKey
-     * @param string $dbKey
-     *
-     * @return void
-     */
-    protected function processData(DB $db, $items, $model, $dataKey, $dbKey)
-    {
-        $rowsAffected = 0;
-        if (!empty($items)) {
-            $rowsAffected = $db::transaction(function () use ($items, $model, $dataKey, $dbKey, $rowsAffected) {
-                foreach ($items as $item) {
-                    if ($result = $this->checkIfExists($model, $item[$dataKey], $dbKey)) {
-                        $this->updateRow($result, $item);
-                    } else {
-                        $this->createRow($model, $item);
-                    }
-                    $rowsAffected++;
-                }
-                return $rowsAffected;
-            });
-        } else {
-            $result = true;
-        }
-
-        $synchronizationStatusModel = $this->synchronizationStatusModel;
-
-        if (empty($items) || $rowsAffected) {
-            $this->updateSynchronization(Synchronization::ID_SUCCESS, $rowsAffected);
-        } else {
-            $this->updateSynchronization(Synchronization::ID_FAILURE);
-        }
     }
 
     /**
@@ -107,8 +61,7 @@ abstract class BaseSynchronization extends Job
      */
     public function failed()
     {
-        $synchronizationStatusModel = $this->synchronizationStatusModel;
-        $this->updateSynchronization($synchronizationStatusModel::ID_FAILURE);
+        $this->updateSynchronization(Synchronization::ID_FAILURE);
     }
 
     /**
@@ -129,15 +82,25 @@ abstract class BaseSynchronization extends Job
      * Update a row
      *
      * @param \App\Models\Model $model
-     * @param array $data contain data from CDK
+     * @param array $data
      *
      * @return bool
      */
     protected function updateRow(Model $model, array $data)
     {
-        $model->fill($data);
-        if ($result = $model->save()) {
-            $this->afterUpdate($model->id, $data);
+        $result = false;
+        try {
+            $fillData = [];
+            foreach ($this->updateColumns as $column) {
+                $fillData[$column] = Arr::get($data, $column);
+            }
+
+            $model->fill($fillData);
+            if ($result = $model->save()) {
+                //
+            }
+        } catch (Exception $e) {
+            // log
         }
 
         return $result;
@@ -155,7 +118,7 @@ abstract class BaseSynchronization extends Job
     {
         $result = $model::create($data);
         if (!empty($result->id)) {
-            $this->afterCreation($result->id, $data);
+            //
         }
     }
 
@@ -169,9 +132,8 @@ abstract class BaseSynchronization extends Job
      */
     protected function getLastSync(int $type, int $status)
     {
-        $sync = $this->synchronizationModel
-            ->where('type_id', '=', $type)
-            ->where('status_id', '=', $status)
+        $sync = Synchronization::where('type', '=', $type)
+            ->where('status', '=', $status)
             ->orderBy('created_at', 'desc')
             ->first();
 
@@ -200,20 +162,23 @@ abstract class BaseSynchronization extends Job
     }
 
     /**
-     * Get items from B4M.
-     *
-     * @param mixed $syncModel
+     * Get items from 1c.
      *
      * @return array
      */
-    protected function getIntegrationItems($syncModel = null)
+    protected function getIntegrationItems()
     {
-        if ($syncModel) {
-            $items = $this->service->getUpdated(strtotime($syncModel->created_at));
-        } else {
-            $items = $this->service->getAll();
-        }
+        return $this->service->getAll();
+    }
 
-        return $items;
+    /**
+     * Get detail item from 1c.
+     *
+     * @param $id
+     * @return mixed
+     */
+    protected function getIntegrationDetail($id)
+    {
+        return $this->service->get($id);
     }
 }

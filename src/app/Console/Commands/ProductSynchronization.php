@@ -2,7 +2,6 @@
 
 namespace Davron112\Synchronizations\Console\Commands;
 
-use Illuminate\Log\Logger;
 use Illuminate\Console\Command;
 use Davron112\Integrations\IntegrationServiceInterface;
 use Davron112\Synchronizations\Jobs\Contracts\ProductSynchronization as SynchronizationJob;
@@ -13,19 +12,13 @@ use Davron112\Synchronizations\Jobs\Contracts\ProductSynchronization as Synchron
  */
 class ProductSynchronization extends Command
 {
-    /**
-     * Logger
-     *
-     * @var \Illuminate\Log\Logger
-     */
-    protected $log;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'site:product-synchronization:run';
+    protected $signature = '1c:product-synchronization:run';
 
     /**
      * The console command description.
@@ -43,13 +36,10 @@ class ProductSynchronization extends Command
      * ProductSynchronization constructor.
      *
      * @param IntegrationServiceInterface $service
-     * @param Logger $log
      */
-    public function __construct(IntegrationServiceInterface $service, Logger $log)
+    public function __construct(IntegrationServiceInterface $service)
     {
         parent::__construct();
-
-        $this->log             = $log;
         $this->integrationService = $service;
     }
 
