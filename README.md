@@ -1,26 +1,16 @@
-## Installation
+## LAravel 1C product auto syncronization
 
-Requires Laravel 5.4
-### Composer
 
-Add the following text to your composer.json:
+### Install
 
-``` bash
-"repositories": [
-  {
-    "type": "vcs",
-    "url": ""
-  }
-],
-```
 
 Then run the following command:
 
 ``` bash
-composer require Davron112/synchronizations
+composer require davron112/synchronizations
 ```
 
-### Provider
+### Add to provider
 
 Add the package to your application service providers in config/app.php file.
 
@@ -37,14 +27,14 @@ Add the package to your application service providers in config/app.php file.
 ],
 ```
 
-Then run the following commands:
+Then run the following commands for publish package files:
 
 ``` bash
 php artisan vendor:publish --provider="Davron112\Synchronizations\Providers\SynchronizationsServiceProvider"
 composer dump-autoload
 ```
 
-### Database
+### Run Database Migration
 
 Finally run migrations and seeders.
 
