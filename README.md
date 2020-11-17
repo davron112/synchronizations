@@ -50,5 +50,4 @@ Finally run migrations and seeders.
 
 ``` bash
 php artisan migrate
-php artisan db:seed
 ```
