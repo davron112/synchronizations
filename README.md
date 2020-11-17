@@ -1,6 +1,6 @@
 ## Installation
 
-Requires Laravel 5.6
+Requires Laravel 5.4
 ### Composer
 
 Add the following text to your composer.json:
